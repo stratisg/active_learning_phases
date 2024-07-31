@@ -1,0 +1,1 @@
+# TODO: Create a generic model with its attributes and methods.
