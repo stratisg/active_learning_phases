@@ -84,14 +84,10 @@ class IsingModel:
             # Interaction energy.
             for neighbor_ in self.l_neighborhood[i_site]:
                 spin_ = self.spins[neighbor_]
-                # Check if the neighbor spin is aligned with the spin 
-                # at the site_center.
-                # check_align = (spin_ + self.spins[tuple(site_center)] + 1) % 2
-                # energy_interaction += check_align
                 energy_interaction += self.check_align(
-                    spin_,self.spins[tuple(site_center)]
+                    spin_, self.spins[tuple(site_center)]
                     )
-
+                
             # Energy due to interaction with external field.
             external_field_energy += np.dot(self.external_field,
                                            self.spins[tuple(site_center)])
@@ -133,9 +129,9 @@ class IsingModel:
         """
         Calculate the absolute value of the system's magnetization.
         """
-        magnetization = self.calculate_magnetization()
+        magnetization_avg = self.calculate_magnetization()
 
-        return np.abs(magnetization) / self.n_sites
+        return np.abs(magnetization_avg)
 
 if __name__ == "__main__":
     lattice = np.array([4, 4], dtype=int)
