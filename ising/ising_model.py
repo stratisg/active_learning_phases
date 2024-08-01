@@ -75,7 +75,6 @@ class IsingModel:
         for the Ising model. The only sites that interact are those within 
         a ball defined by the keyword argument radius.
         """
-        self.get_neighborhood()
         energy_interaction = 0.0
         external_field_energy = 0.0
         for i_site, site_center in enumerate(self.site_indices):
@@ -105,5 +104,6 @@ if __name__ == "__main__":
     lattice = np.array([4, 4], dtype=int)
     ising = IsingModel(lattice)
     ising.generate_site_indices()
+    ising.get_neighborhood()
     energy = ising.calculate_energy()
     print(f"energy {energy}")
