@@ -49,21 +49,33 @@ class IsingModel:
         boundary of the ball with the given radius centered at a given 
         site.
         """
+        dist_half_lattice = np.linalg.norm(self.lattice // 2)
         for i_site, site_center in enumerate(self.site_indices):
+            # if i_site > 1:
+            #     quit()
+            # print(79 * "=")
+            # print(f"i_site {i_site}, site_center {site_center}")
             for site_index in self.site_indices:
                 site_ = site_index.copy()
-                if self.boundary_conds == "periodic":
-                    for dim in range(self.n_dims):
-                        print(f"dim {dim}")
-                        print(f"site_[dim] {site_[dim]}")
-                        print(f" self.lattice[dim] {self.lattice[dim]}")
-                        
-                        if site_[dim] >= (self.lattice[dim] // 2):
-                            site_[dim] = site_index[dim] - self.lattice[dim] // 2
                 # Euclidean distance.
-                if 0 < np.linalg.norm(site_ - site_center) <= self.radius:
+                dist = np.linalg.norm(site_ - site_center)
+                
+                if (self.boundary_conds == "periodic" and
+                dist > dist_half_lattice):
+                    for dim in range(self.n_dims):
+                        dist_dim = np.sqrt((site_[dim] - site_center[dim])**2)
+                        half_dim = self.lattice[dim] // 2
+                        if dist_dim > half_dim:
+                            site_[dim] = self.lattice[dim] - site_index[dim]
+        
+                # Euclidean distance.
+                dist = np.linalg.norm(site_ - site_center)
+                if 0 < dist <= self.radius:
                     self.l_neighborhood[i_site].append(site_index)
-
+            # print(29 * "=")
+            # print(f"{site_center}")
+            # print(f"self.l_neighborhood[i_site] {self.l_neighborhood[i_site]}")
+        
     def calculate_energy(self):
         """
         Calculate the enerrgy corresponding to a given spin configuration 
