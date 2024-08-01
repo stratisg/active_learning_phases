@@ -22,7 +22,7 @@ class IsingModel:
         self.l_neighborhood = [[] for _ in range(self.n_sites)]
 
         # TODO: Generalize for arbitrary geometries.
-        # Note: The current function works only for rectangular lattices 
+        # Note: The current function works only for rectangular lattices
         # and their generalizations.
         self.spins = rnd.default_rng(seed).choice([0, 1], size=self.lattice)
 
@@ -51,10 +51,6 @@ class IsingModel:
         """
         dist_half_lattice = np.linalg.norm(self.lattice // 2)
         for i_site, site_center in enumerate(self.site_indices):
-            # if i_site > 1:
-            #     quit()
-            # print(79 * "=")
-            # print(f"i_site {i_site}, site_center {site_center}")
             for site_index in self.site_indices:
                 site_ = site_index.copy()
                 # Euclidean distance.
@@ -68,40 +64,46 @@ class IsingModel:
                         if dist_dim > half_dim:
                             site_[dim] = self.lattice[dim] - site_index[dim]
         
-                # Euclidean distance.
-                dist = np.linalg.norm(site_ - site_center)
+                    # Euclidean distance.
+                    dist = np.linalg.norm(site_ - site_center)
                 if 0 < dist <= self.radius:
-                    self.l_neighborhood[i_site].append(site_index)
-            # print(29 * "=")
-            # print(f"{site_center}")
-            # print(f"self.l_neighborhood[i_site] {self.l_neighborhood[i_site]}")
-        
+                    self.l_neighborhood[i_site].append(tuple(site_index))
+
     def calculate_energy(self):
         """
         Calculate the enerrgy corresponding to a given spin configuration 
         for the Ising model. The only sites that interact are those within 
         a ball defined by the keyword argument radius.
         """
-        energy_interaction = 0
-        external_field_energy = 0 
+        self.get_neighborhood()
+        energy_interaction = 0.0
+        external_field_energy = 0.0
         for i_site, site_center in enumerate(self.site_indices):
-            # Identify sites within the ball of given radius.
-            pass
-            # self.l_neighborhood[i_site].sum() * self.spins[site]
-            #     external_field_energy = np.dot(external_field, spin_site)
+            energy_interaction_before = energy_interaction
+            # Interaction energy.
+            for neighbor_ in self.l_neighborhood[i_site]:
+                spin_ = self.spins[neighbor_]
+                # Check if the neighbor spin is aligned with the spin 
+                # at the site_center.
+                check_align = (spin_ + self.spins[tuple(site_center)] + 1) % 2
+                energy_interaction += check_align
+            # Energy due to interaction with external field.
+            external_field_energy += np.dot(self.external_field,
+                                           self.spins[tuple(site_center)])
+        
+        # Correct for double counting.
+        energy_interaction /= 2
+
+        # TODO: Generalize to site-dependent interactions.
+        # Multiiply by interaction.
+        energy_interaction *= -self. interaction
+
+        return energy_interaction + external_field_energy
 
 
 if __name__ == "__main__":
     lattice = np.array([4, 4], dtype=int)
     ising = IsingModel(lattice)
-    
-    for spin in [0, 1]:
-        print(f"spin {spin}")
-        spin_flip = ising.update(spin)
-        print(f"Flipped spin: {spin_flip}")
     ising.generate_site_indices()
-    print("site_indices")
-    print(ising.site_indices)
-    ising.get_neighborhood()
-    print("l_neighborhood")
-    print(ising.l_neighborhood)
+    energy = ising.calculate_energy()
+    print(f"energy {energy}")
