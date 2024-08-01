@@ -1,5 +1,7 @@
 import numpy as np
 import numpy.random as rnd
+from analyze_samples import calculate_magnetization
+from analyze_samples import calculate_absolute_magnetization
 
 
 class IsingModel:
@@ -8,6 +10,7 @@ class IsingModel:
     """
     def __init__(self, lattice, interaction=1, external_field=0, radius=1,
                  boundary_conds="periodic", seed=1959) -> None:
+        self.model_name = "ising"
         self.lattice = lattice
         self.n_dims = len(lattice)  # Lattice dimensionality. 
         self.n_sites = 1  # Total number of sites.
@@ -78,28 +81,19 @@ class IsingModel:
         average energy per site to avoid issues as we change the 
         system's size.
         """
-        energy_interaction = 0.0
-        external_field_energy = 0.0
-        for i_site, site_center in enumerate(self.site_indices):
-            # Interaction energy.
-            for neighbor_ in self.l_neighborhood[i_site]:
-                spin_ = self.spins[neighbor_]
-                energy_interaction += self.check_align(
-                    spin_, self.spins[tuple(site_center)]
-                    )
-                
-            # Energy due to interaction with external field.
-            external_field_energy += np.dot(self.external_field,
-                                           self.spins[tuple(site_center)])
+        interaction_total = 0
+        external_field_total = 0
+        for i_site in range(self.n_sites):
+            energy_interaction, external_field_energy = (
+                self.calculate_local_energy(i_site)
+                )
+            interaction_total += energy_interaction
+            external_field_total += external_field_energy
         
-        # Correct for double counting.
-        energy_interaction /= 2
-
-        # TODO: Generalize to site-dependent interactions.
-        # Multiiply by interaction.
-        energy_interaction *= -self. interaction
-
-        return (energy_interaction + external_field_energy) / self.n_sites
+        # Correct for the double counting.
+        interaction_total /= 2      
+        
+        return (interaction_total + external_field_total) / self.n_sites
     
     def get_spins(self):
         """
@@ -114,24 +108,39 @@ class IsingModel:
         """
         Check alignment beween two spins.
         """
-        
+
         return  np.abs((spin0 + spin1) / 2)
-    
-    def calculate_magnetization(self):
+  
+    def calculate_local_energy(self, site_index):
         """
-        Calculate the system's average magnetization.
+        Calculate the energy within a ball centered around the spin at
+        site_index.
         """
-        spins_ = self.get_spins() 
+        spin_center = self.spins[tuple(self.site_indices[site_index])]
+        neighborhood = self.l_neighborhood[site_index]
+        energy_interaction = 0.0
+        external_field_energy = 0.0
 
-        return spins_.sum() / self.n_sites
-    
-    def calculate_absolute_magnetization(self):
-        """
-        Calculate the absolute value of the system's magnetization.
-        """
-        magnetization_avg = self.calculate_magnetization()
+        # Interaction energy.
+        for neighbor_ in neighborhood:
+            spin_ = self.spins[neighbor_]
+            energy_interaction += self.check_align(spin_, spin_center)
+            
+        # Energy due to interaction with external field.
+        external_field_energy += np.dot(self.external_field, spin_center)
 
-        return np.abs(magnetization_avg)
+        # TODO: Generalize to site-dependent interactions.
+        # Multiply by interaction.
+        energy_interaction *= -self.interaction
+
+        # TODO: Do we need to take into account the double counting?
+        # No! We still divide by the number of sites because the total
+        # energy is the energy per site of the entire system.
+        energy_local = (energy_interaction + external_field_energy)
+        energy_local /=  self.n_sites
+
+        return energy_interaction, external_field_energy
+    
 
 if __name__ == "__main__":
     lattice = np.array([4, 4], dtype=int)
@@ -142,8 +151,7 @@ if __name__ == "__main__":
     ising.get_neighborhood()
     energy = ising.calculate_energy()
     print(f"energy {energy}")
-    magnetization = ising.calculate_magnetization()
+    magnetization = calculate_magnetization(ising.spins)
     print(f"magnetization {magnetization}")
-    abs_magn = ising.calculate_absolute_magnetization()
+    abs_magn = calculate_absolute_magnetization(ising.spins)
     print(f"absolute magnetization {abs_magn}")
-
