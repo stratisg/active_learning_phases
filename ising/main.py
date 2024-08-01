@@ -5,7 +5,7 @@ from ising_model import IsingModel
 from visualization import plot_quantity
 
 
-ising_args = dict(lattice=np.array([4, 4], dtype=int), interaction=1,
+ising_args = dict(lattice=np.array([10, 10], dtype=int), interaction=1,
                 external_field=0, radius=1,
                 boundary_conds="periodic", seed=1959)
 ising_model = IsingModel(**ising_args)
@@ -13,13 +13,13 @@ ising_model.generate_site_indices()
 ising_model.get_neighborhood()
 
 # Simulation configuration.
-n_samples = int(1e3)
+n_samples = int(5e5)
 k_boltzmann = 1
 warmup_iter = int(1e3)
 
 # Generate data to fit the model used to identify the boundary 
 # between phases. 
-temp_min = 5e-1
+temp_min = 1.5e-1
 temp_max = 3.0
 temp_delta = 2e-1
 l_temperatures = np.arange(temp_max, temp_min, -temp_delta)
