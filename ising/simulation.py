@@ -1,15 +1,14 @@
 import numpy as np
 import numpy.random as rnd
-from ising_model import IsingModel
 
 
-# TODO: Should I convert simulation into a class?
 class Simulation:
     """
     The class that desctibes each simulation.
     """
     def __init__(self, model, n_samples, temperature, k_boltzmann=1,
-                 warmup_iter=int(1e3), seed_warmup=1821, seed_generation=1917):
+                 warmup_iter=int(1e3), seed_warmup=1821, seed_generation=1917,
+                 verbose=False):
         self.model = model
         self.n_samples = n_samples
         self.k_boltzmann = k_boltzmann
@@ -17,6 +16,8 @@ class Simulation:
         self.warmup_iter = warmup_iter
         self.seed_generation = seed_generation
         self.seed_warmup = seed_warmup
+        self.verbose = verbose
+
         self.decorr_length = self.model.n_sites
         self.energy = np.zeros(self.n_samples)
         self.magnetization = np.zeros_like(self.energy)
@@ -38,12 +39,14 @@ class Simulation:
         """
         # Warmup stage of the Metropolis aplgorithm.
         self.metropolis_core(self.warmup_iter, self.seed_warmup,
-                             warmup_stage=True)
+                             warmup_stage=True, verbose=self.verbose)
         
         # Using Metropolis for Sample generation.
-        self.metropolis_core(self.n_samples, self.seed_generation)
+        self.metropolis_core(self.n_samples, self.seed_generation,
+                             verbose=self.verbose)
 
-    def metropolis_core(self, n_iterations, seed, warmup_stage=False):
+    def metropolis_core(self, n_iterations, seed, warmup_stage=False,
+                        verbose=False):
         """
         The core part of the Metropolis algorithm.
         """
@@ -109,20 +112,33 @@ class Simulation:
         if warmup_stage:
             self.decorr_length = int(max(decorr_length, 1))
         accept_ratio = accepted_attempts / n_total_iters
-        print(39 * "=")
-        print(f"Acceptance ratio: {accept_ratio:3f}.")
-        print(f"Number of de-correlation samples: {self.decorr_length}.")
-        print(39 * "=")
+        if verbose:
+            print(39 * "=")
+            print(f"Acceptance ratio: {accept_ratio:3f}.")
+            print(f"Number of de-correlation samples: {self.decorr_length}.")
+            print(39 * "=")
 
 
-def optimize():
+def optimize(data):
     """
     Function for recommending parameter values to use in the subsequent
     simulation.  
     """
+    
+    # TODO: Use results from all simulations to fit a model that 
+    # outputs the order parameter as a function of the model parameters.
+    # TODO: Find the set of points that satisfy a certain objective 
+    # such as we have the highest uncertainty or most sensitivity to 
+    # input parameters.
+
 
 if __name__ == "__main__":
-    ising_args = dict(lattice=np.array([4, 4], dtype=int), interaction=1,
+    import os
+    from ising_model import IsingModel
+    from visualization import plot_quantity
+
+
+    ising_args = dict(lattice=np.array([10, 10], dtype=int), interaction=1,
                     external_field=0, radius=1,
                     boundary_conds="periodic", seed=1959)
     ising_model = IsingModel(**ising_args)
@@ -130,17 +146,39 @@ if __name__ == "__main__":
     ising_model.get_neighborhood()
 
     # Simulation configuration.
-    n_samples = int(1e3)
+    n_samples = int(1e5)
     k_boltzmann = 1
     warmup_iter = int(1e3)
-    temperature = 1
+    
+    # Generate data to fit the model used to identify the boundary 
+    # between phases. 
+    temp_min = 5e-1
+    temp_max = 3.0
+    temp_delta = 2e-2
+    l_temperatures = np.arange(temp_max, temp_min, -temp_delta)
+    l_magn_abs_avg = np.zeros(len(l_temperatures), dtype=float)
+    for i_temp, temperature in enumerate(l_temperatures):
+        print(79 * "=")
+        print(f"Temperature {temperature:.3f}")
+        simulation_args = dict(n_samples=n_samples, temperature=temperature,
+                                k_boltzmann=k_boltzmann,
+                                warmup_iter=warmup_iter, seed_warmup=1821,
+                                seed_generation=1917)
+        simulation = Simulation(ising_model, **simulation_args)
+        simulation.generate_samples()
+        energy_avg, magn_avg, magn_abs_avg = simulation.calculate_averages()
+        l_magn_abs_avg[i_temp] = magn_abs_avg
+    d_quantity = {"Average absolute magnetization":
+                  (l_magn_abs_avg, "blue", "-")}
+    model_name = "ising"
+    figname =  f"{model_name}_average_absolute_magnetization"
+    dpi = 600
+    pics_dir = "../pics"
+    if not os.path.isdir(pics_dir):
+        os.mkdir(pics_dir)
+    pics_dir_model = f"../pics/{model_name}"
+    # TODO: Save samples for future analysis.
+    # TODO: Save quantities along with temperatures.
 
-
-    simulation = Simulation(ising_model, n_samples, temperature,
-                            k_boltzmann, warmup_iter, seed_warmup=1821,
-                            seed_generation=1917)
-    simulation.generate_samples()
-    energy_avg, magn_avg, magn_abs_avg = simulation.calculate_averages()
-    print(f"energy_avg: {energy_avg}")
-    print(f"magnetization avg: {magn_avg}")
-    print(f"magnetization absolute avg: {magn_abs_avg}")
+    plot_quantity(l_temperatures, d_quantity, figname, dpi=dpi,
+                  pics_dir=pics_dir_model)
