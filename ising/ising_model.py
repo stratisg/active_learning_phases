@@ -1,7 +1,5 @@
 import numpy as np
 import numpy.random as rnd
-from analyze_samples import calculate_magnetization
-from analyze_samples import calculate_absolute_magnetization
 
 
 class IsingModel:
@@ -91,7 +89,7 @@ class IsingModel:
             external_field_total += external_field_energy
         
         # Correct for the double counting.
-        interaction_total /= 2      
+        interaction_total /= 2
         
         return (interaction_total + external_field_total) / self.n_sites
     
@@ -143,6 +141,11 @@ class IsingModel:
     
 
 if __name__ == "__main__":
+    from utilities import calculate_magnetization
+    from utilities import calculate_absolute_magnetization
+    from utilities import calculate_absolute_staggered_magnetization
+    
+    
     lattice = np.array([4, 4], dtype=int)
     ising = IsingModel(lattice)
     print("ising.spins")
@@ -155,3 +158,8 @@ if __name__ == "__main__":
     print(f"magnetization {magnetization}")
     abs_magn = calculate_absolute_magnetization(ising.spins)
     print(f"absolute magnetization {abs_magn}")
+    abs_stagg_magn = calculate_absolute_staggered_magnetization(
+        ising.spins, ising.site_indices
+    )
+    print(f"absolute staggered magnetization {abs_stagg_magn}")
+    

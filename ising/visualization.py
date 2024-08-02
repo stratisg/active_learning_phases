@@ -18,7 +18,8 @@ def plot_quantity(l_temperatures, d_quantity, figname, dpi=600,
     """
     Plot quantity as a function of temperature.
     """
-    for label, (quantity, color, marker) in d_quantity.items():
-        plt.scatter(l_temperatures, quantity, label=label, c=color,
-                    marker=marker)
-        save_fig(f"{figname}_{label}", dpi, pics_dir)
+    for quant_name, (quantity, d_plot, xlabel, ylabel) in d_quantity.items():
+        plt.scatter(l_temperatures, quantity, **d_plot)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        save_fig(f"{figname}_{quant_name}", dpi, pics_dir)
