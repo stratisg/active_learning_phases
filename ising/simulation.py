@@ -9,7 +9,7 @@ class Simulation:
     """
     def __init__(self, model, n_samples, temperature, k_boltzmann=1,
                  warmup_iter=int(1e3), seed_warmup=1821, seed_generation=1917,
-                 verbose=False, data_dir="../data"):
+                 verbose=False, data_dir="data"):
         
         self.model = model
 
@@ -37,10 +37,14 @@ class Simulation:
         # Using Metropolis for Sample generation.
         self.metropolis_core(self.n_samples, self.seed_generation,
                              verbose=self.verbose)
+        
+        # Save data.
         if not os.path.isdir(self.data_dir):
             os.mkdir(self.data_dir)
-        np.savez(f"{self.data_dir}/data_{self.model.model_name}_\
-                 temperature_{self.temperature}", samples=self.samples,
+        
+        np.savez(f"{self.data_dir}/data_{self.model.model_name}_"\
+                 f"temperature_{self.temperature}",
+                 samples=self.samples,
                  temperature=self.temperature,
                  interaction=self.model.interaction,
                  external_field=self.model.external_field,
