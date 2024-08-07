@@ -2,8 +2,8 @@ import os
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
-from utilities import results_dir_model, model_name
-from utilities import figname, dpi, pics_dir_model
+from config import results_dir_model
+from config import figname, dpi, pics_dir_model
 
 
 def save_fig(figname, dpi=600, pics_dir="../pics/"):
@@ -17,46 +17,39 @@ def save_fig(figname, dpi=600, pics_dir="../pics/"):
     plt.close()
 
 
-def plot_quantity(d_plot, figname, dpi=600, pics_dir="../pics"):
+def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
+                  vmin=-3, vmax=3):
     """
     Plot quantity as a function of temperature.
     """
-    for quant_name, (d_vals, d_plot_vars, xlabel, ylabel) in d_plot.items():
-        for interaction in d_vals["interaction"]:
-            plt.scatter(d_vals["l_temperatures"], d_vals["quantity"],
-                        **d_plot_vars)
-            plt.xlabel(xlabel)
-            plt.ylabel(ylabel)
-            save_fig(f"{figname}_{quant_name}_interaction_{interaction}", dpi,
-                     pics_dir)
+    l_values = d_plot["l_values"]
+    for d_vals in l_values:
+        plt.scatter(d_vals["temperature"], d_vals["quantity_mean"],
+                    c=d_vals["interaction"], vmin=vmin, vmax=vmax)
+    plt.xlabel(d_plot["xlabel"])
+    plt.ylabel(d_plot["ylabel"])
+    plt.colorbar()
+    save_fig(f"{figname}_{quant_name}", dpi, pics_dir)
 
 
-def load_quantity(results_dir_model, model_name):
+def load_quantity(results_dir_model, quant_name):
     """
     Load quantities from results directory.
     """
-    l_files = glob.glob(f"{results_dir_model}/quantities_*.npz")
-    d_quantity = {}
+    l_files = glob.glob(f"{results_dir_model}/*_{quant_name}_*.npz")
+    l_files.sort()
+    l_values = []
     for filename in l_files:
+        d_pars = {}
         data = np.load(filename)
-        quant_name = filename.split("quantity_")[1].split(".npz")[0]
-        d_quantity[quant_name] = np.array(
-            [
-            data["l_interactions"],
-            data["l_temperatures"],
-            data["quantity"]
-            ]
-        )
+        for (key, value) in data.items():
+            d_pars[key] = value
+        l_values.append(d_pars)
+    
+    return l_values
 
 
-d_quantities = load_quantity(results_dir_model, model_name)
-d_plot = {
-    "avg_magnetization": [d_quantities["avg_absolute_magn"],
-                            dict(c="blue", marker="o"), "T", r" $ <M> $"
-                            ],
-    "avg_stagg_magnetization": [d_quantities["avg_absolute_stagg_magn"],
-                                        dict(c="blue", marker="o"),
-                                        "T", r" $ <M_s> $ "
-                                        ]
-            }
-plot_quantity(d_plot, figname, dpi, pics_dir_model)
+quant_name = "avg_magnetization"
+l_values = load_quantity(results_dir_model, quant_name)
+d_plot = dict(l_values=l_values, xlabel="T", ylabel=r" $ <M> $")
+plot_quantity(quant_name, d_plot, figname, dpi, pics_dir_model)
