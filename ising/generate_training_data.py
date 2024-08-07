@@ -1,34 +1,16 @@
-import os
-import numpy as np
+"""
+Generate training data to fit the model used to identify the boundary 
+between phases.
+"""
 from simulation import Simulation
-from ising_model import IsingModel
-from ising_configuration import ising_args, n_samples, k_boltzmann, warmup_iter
+from config import data_dir
+from config import model, n_samples, k_boltzmann, warmup_iter
+from config import l_temperatures, l_interactions
 
 
-if not os.path.isdir("../data"):
-    os.mkdir("../data")
-
-ising_model = IsingModel(**ising_args)
-ising_model.generate_site_indices()
-ising_model.get_neighborhood()
-
-# Generate data to fit the model used to identify the boundary 
-# between phases. Build a grid with different values for temperature 
-# and interaction strength.
-# TODO: Potentially use Latin hypercube for building the training set.
-
-# Temperature.
-temp_min = 0.5
-temp_max = 3.0
-temp_delta = 5e-1
-l_temperatures = np.arange(temp_max, temp_min, -temp_delta)
-
-# Interaction strength.
-interaction_min = -2.0
-interaction_max = 2.5
-interaction_delta = 5e-1
-l_interactions = np.arange(interaction_min, interaction_max, interaction_delta)
-
+# TODO: Convert the two for loops below to a single one that runs over
+# the different configurations in order to generalize this script to
+# different models.
 for temperature in l_temperatures:
     print(79 * "=")
     print(f"Temperature {temperature:.3f}")
@@ -37,12 +19,12 @@ for temperature in l_temperatures:
             continue
         print(39 * "=")
         print(f"Interaction {interaction:.3f}")
-        ising_model.interaction = interaction
+        model.interaction = interaction
         simulation_args = dict(n_samples=n_samples, temperature=temperature,
                             k_boltzmann=k_boltzmann,
                             warmup_iter=warmup_iter, seed_warmup=1821,
                             seed_generation=1917, verbose=True,
-                            data_dir="../data/ising")
-        simulation = Simulation(ising_model, **simulation_args)
+                            data_dir=f"{data_dir}/{model.model_name}")
+        simulation = Simulation(model, **simulation_args)
         simulation.generate_samples()
     

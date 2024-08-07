@@ -1,8 +1,7 @@
-import os
 import glob
 import numpy as np
-from ising_model import IsingModel
-from ising_configuration import ising_args
+from config import data_dir_model, model_name
+from config import pics_dir_model, dpi
 from utilities import calculate_absolute_magnetization
 from utilities import calculate_absolute_staggered_magnetization
 from utilities import calculate_quantity_stats
@@ -10,13 +9,6 @@ from visualization import plot_quantity
 
 
 # TODO: Create videos.
-
-data_dir_parent = "../data" 
-ising = IsingModel(**ising_args)
-model_name = ising.model_name
-ising.generate_site_indices()
-data_dir_model = f"{data_dir_parent}/{model_name}"
-
 l_filenames = glob.glob(f"{data_dir_model}/data_{model_name}*.npz")
 l_temperatures = np.zeros(len(l_filenames))
 avg_absolute_magn = np.zeros_like(l_temperatures)
@@ -63,9 +55,4 @@ d_quantity = {
             }
 
 figname =  f"{model_name}"
-dpi = 600
-pics_dir = "../pics"
-if not os.path.isdir(pics_dir):
-    os.mkdir(pics_dir)
-pics_dir_model = f"../pics/{model_name}"
 plot_quantity(l_temperatures, d_quantity, figname, dpi, pics_dir_model)
