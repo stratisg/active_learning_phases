@@ -5,7 +5,7 @@ import os
 import glob
 import numpy as np
 import torch
-from config import n_epochs, n_points, loss_fn, fit_model, optimizer
+from config import n_points, fit_model, training_args
 from config import model, simulation_args
 from config import data_dir_model, results_dir_model
 from simulation import Simulation
@@ -23,12 +23,14 @@ for i_val, d_vals in enumerate(l_values):
     l_quantity_mean[i_val] = d_vals["quantity_mean"]
     l_temperatures[i_val] = d_vals["temperature"]
     l_interactions[i_val] = d_vals["interaction"]
-l_data = torch.tensor([l_temperatures, l_interactions, l_quantity_mean],
-                      dtype=torch.float).T
+l_data_in = np.array([l_temperatures, l_interactions])
+l_data_in = torch.tensor(l_data_in.T, dtype=torch.float)
+l_data_out = torch.tensor(l_quantity_mean, dtype=torch.float)
+l_data_out = torch.reshape(l_data_out, (len(l_data_in), 1))
 
 for i_pt in range(n_points):
     # 2. Train/fit the model.
-    model = training(l_data, fit_model, loss_fn, optimizer, n_epochs)
+    model = training(l_data_in, l_data_out, fit_model,**training_args)
     quit()
     # 3. Suggest a new set of parameters to simulate.
     # We find the point that maximizes the magnitude of the gradient of
