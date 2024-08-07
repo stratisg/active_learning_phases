@@ -3,6 +3,9 @@ Configuration for the Ising model and its simulation.
 """
 import os
 import numpy as np
+from torch.nn import Sequential, Linear, ReLU
+from torch.nn import MSELoss
+from torch.optim import SGD
 from ising_model import IsingModel
 
 
@@ -53,6 +56,23 @@ l_interactions = np.arange(interaction_min, interaction_max,
                            interaction_delta)
 
 training_pars = [l_temperatures, l_interactions]
+
+# Optimization parameters.
+
+# Define the model.
+# TODO: Avoid hardcoding
+n_hidden = 10
+fit_model = Sequential(Linear(in_features=2, out_features=n_hidden),
+                       ReLU(),
+                       Linear(in_features=n_hidden, out_features=1)
+)
+optimizer_fn = SGD
+optimizer_args = dict(lr=1e-3, momentum=0, dampening=0, weight_decay=0,
+                      nesterov=False)
+optimizer = optimizer_fn(fit_model.parameters(), **optimizer_args)
+n_epochs = int(1e2)
+n_points = int(1e1)
+loss_fn = MSELoss()
 
 # Parameters used to generate results.
 results_dir = "../results"

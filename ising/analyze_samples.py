@@ -47,18 +47,20 @@ def analyze_data(data_dir_model, results_dir_model, quant_name, quant_fn,
         _, _ = get_quantity(filename, quant_name, quant_fn, quant_args,
                             results_dir_model)
 
-d_quantities = dict(
-    avg_magnetization=dict(
-    quant_fn=calculate_absolute_magnetization, quant_args={}
-    ),
-    avg_stagg_magnetization=dict(
-    quant_fn=calculate_absolute_staggered_magnetization,
-    quant_args={"site_indices": site_indices}
-    )
-)   
-for quant_name, d_quant in d_quantities.items():
+
+if __name__ == "__main__":
+    d_quantities = dict(
+        avg_magnetization=dict(
+        quant_fn=calculate_absolute_magnetization, quant_args={}
+        ),
+        avg_stagg_magnetization=dict(
+        quant_fn=calculate_absolute_staggered_magnetization,
+        quant_args={"site_indices": site_indices}
+        )
+    )   
+    for quant_name, d_quant in d_quantities.items():
+        print(79 * "=")
+        print(quant_name)
+        print(39 * "+")
+        analyze_data(data_dir_model, results_dir_model, quant_name, **d_quant)
     print(79 * "=")
-    print(quant_name)
-    print(39 * "+")
-    analyze_data(data_dir_model, results_dir_model, quant_name, **d_quant)
-print(79 * "=")

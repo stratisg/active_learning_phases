@@ -1,3 +1,4 @@
+import glob
 import numpy as np
 
 
@@ -42,3 +43,20 @@ def calculate_quantity_stats(l_samples, quantity_fn, quant_args):
 
     return quantity.mean(), quantity.std()
 
+
+
+def load_quantity(results_dir_model, quant_name):
+    """
+    Load quantities from results directory.
+    """
+    l_files = glob.glob(f"{results_dir_model}/*_{quant_name}_*.npz")
+    l_files.sort()
+    l_values = []
+    for filename in l_files:
+        d_pars = {}
+        data = np.load(filename)
+        for (key, value) in data.items():
+            d_pars[key] = value
+        l_values.append(d_pars)
+    
+    return l_values
