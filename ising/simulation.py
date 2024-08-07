@@ -130,18 +130,8 @@ class Simulation:
 
 
 if __name__ == "__main__":
-    from ising_model import IsingModel
-    from visualization import plot_quantity
+    from config import model, data_dir_model
 
-
-    if not os.path.isdir("data"):
-        os.mkdir("data")
-    ising_args = dict(lattice=np.array([4, 4], dtype=int), interaction=1,
-                    external_field=0, radius=1,
-                    boundary_conds="periodic", seed=1959)
-    ising_model = IsingModel(**ising_args)
-    ising_model.generate_site_indices()
-    ising_model.get_neighborhood()
 
     # Simulation configuration.
     n_samples = int(1e3)
@@ -151,6 +141,6 @@ if __name__ == "__main__":
     simulation_args = dict(n_samples=n_samples, temperature=temperature,
                            k_boltzmann=k_boltzmann, warmup_iter=warmup_iter,
                            seed_warmup=1821, seed_generation=1917,
-                           verbose=True, data_dir="data/ising")
-    simulation = Simulation(ising_model, **simulation_args)
+                           verbose=True, data_dir=data_dir_model)
+    simulation = Simulation(model, **simulation_args)
     simulation.generate_samples()

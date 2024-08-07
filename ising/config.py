@@ -19,12 +19,24 @@ model = IsingModel(**ising_args)
 model_name = model.model_name
 model.generate_site_indices()
 model.get_neighborhood()
+site_indices = model.site_indices
 data_dir_model = f"{data_dir}/{model.model_name}"
+if not os.path.isdir(data_dir_model):
+    os.mkdir(data_dir_model)
 
 # Simulation configuration.
 n_samples = int(1e5)
 k_boltzmann = 1
 warmup_iter = int(1e3)
+# Simulation configuration.
+n_samples = int(1e3)
+k_boltzmann = 1
+warmup_iter = int(1e3)
+temperature = 2.0
+simulation_args = dict(n_samples=n_samples, temperature=temperature,
+                        k_boltzmann=k_boltzmann, warmup_iter=warmup_iter,
+                        seed_warmup=1821, seed_generation=1917,
+                        verbose=True, data_dir=data_dir_model)
 
 # Parameters used to generate training data.
 # Temperature.
@@ -42,9 +54,20 @@ l_interactions = np.arange(interaction_min, interaction_max,
 
 training_pars = [l_temperatures, l_interactions]
 
+# Parameters used to generate results.
+results_dir = "../results"
+if not os.path.isdir(results_dir):
+    os.mkdir(results_dir)
+results_dir_model = f"{results_dir}/{model_name}"
+if not os.path.isdir(results_dir_model):
+    os.mkdir(results_dir_model)
+
 # Visualization parameters.
 dpi = 600
 pics_dir = "../pics"
 if not os.path.isdir(pics_dir):
     os.mkdir(pics_dir)
 pics_dir_model = f"../pics/{model_name}"
+figname =  f"{model_name}"
+if not os.path.isdir(pics_dir_model):
+    os.mkdir(pics_dir_model)
