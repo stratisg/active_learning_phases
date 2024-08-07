@@ -10,6 +10,7 @@ from config import model, simulation_args
 from config import data_dir_model, results_dir_model
 from simulation import Simulation
 from training import training
+from optimize import optimize
 from analyze_samples import get_quantity
 from utilities import calculate_absolute_magnetization, load_quantity
 
@@ -31,12 +32,17 @@ l_data_out = torch.reshape(l_data_out, (len(l_data_in), 1))
 for i_pt in range(n_points):
     # 2. Train/fit the model.
     model = training(l_data_in, l_data_out, fit_model,**training_args)
-    quit()
+
     # 3. Suggest a new set of parameters to simulate.
     # We find the point that maximizes the magnitude of the gradient of
     # the model with respect to its input.
     # TODO: Under construction.
-    # temperature, interaction = 
+    temperature, interaction = optimize(model, n_input=l_data_in.shape[1])
+    print("temperature")
+    print(temperature)
+    print("interaction")
+    print(interaction)
+    quit()
     # 4. Run the simulation.
     model.interaction = interaction
     simulation = Simulation(model, **simulation_args)
@@ -51,3 +57,10 @@ for i_pt in range(n_points):
                  results_dir_model)
 # 6. Append the results of the simulation on the training set.
 # 7. Repeat from step 2 until a certain criterion is satisfied. 
+
+
+# TODO: Use results from all simulations to fit a model that 
+# outputs the order parameter as a function of the model parameters.
+# TODO: Find the set of points that satisfy a certain objective 
+# such as we have the highest uncertainty or most sensitivity to 
+# input parameters.
