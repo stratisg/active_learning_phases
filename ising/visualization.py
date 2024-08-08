@@ -17,14 +17,14 @@ def save_fig(figname, dpi=600, pics_dir="../pics/"):
 
 
 def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
-                  vmin=-3, vmax=3):
+                  vmin=0, vmax=1):
     """
     Plot quantity as a function of temperature.
     """
     l_values = d_plot["l_values"]
     for d_vals in l_values:
-        plt.scatter(d_vals["temperature"], d_vals["quantity_mean"],
-                    c=d_vals["interaction"], vmin=vmin, vmax=vmax)
+        plt.scatter(d_vals["interaction"], d_vals["temperature"],
+                    c=d_vals["quantity_mean"], vmin=vmin, vmax=vmax)
     plt.xlabel(d_plot["xlabel"])
     plt.ylabel(d_plot["ylabel"])
     plt.colorbar()
@@ -33,5 +33,5 @@ def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
 
 quant_name = "avg_magnetization"
 l_values = load_quantity(results_dir_model, quant_name)
-d_plot = dict(l_values=l_values, xlabel="T", ylabel=r" $ <M> $")
+d_plot = dict(l_values=l_values, xlabel="J", ylabel="T")
 plot_quantity(quant_name, d_plot, figname, dpi, pics_dir_model)
