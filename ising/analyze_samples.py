@@ -6,7 +6,7 @@ from utilities import calculate_absolute_staggered_magnetization
 from utilities import calculate_quantity_stats
 
 
-def get_quantity(filename, quant_name, quant_fn, quant_args,
+def save_quantity(filename, quant_name, quant_fn, quant_args,
                   results_dir_model):
     """
     Calculate quantity from specific data file
@@ -34,20 +34,6 @@ def get_quantity(filename, quant_name, quant_fn, quant_args,
     return quantity_mean, quantity_std    
 
 
-def analyze_data(data_dir_model, results_dir_model, quant_name, quant_fn,
-                 quant_args):
-    """
-    Generate quantities given the data generated with a given model.
-    """
-    # Load data.
-    l_filenames = glob.glob(f"{data_dir_model}/data_*.npz")
-
-    for i_file, filename in enumerate(l_filenames):
-        print(f"Progress {(i_file + 1) / len(l_filenames):.3f}")
-        _, _ = get_quantity(filename, quant_name, quant_fn, quant_args,
-                            results_dir_model)
-
-
 if __name__ == "__main__":
     d_quantities = dict(
         avg_magnetization=dict(
@@ -58,9 +44,15 @@ if __name__ == "__main__":
         quant_args={"site_indices": site_indices}
         )
     )   
+    
     for quant_name, d_quant in d_quantities.items():
         print(79 * "=")
         print(quant_name)
         print(39 * "+")
-        analyze_data(data_dir_model, results_dir_model, quant_name, **d_quant)
+        # Load data.
+        l_filenames = glob.glob(f"{data_dir_model}/data_*.npz")
+
+        for filename in l_filenames:
+            save_quantity(filename, quant_name, d_quant["quant_fn"],
+                          d_quant["quant_args"], results_dir_model)
     print(79 * "=")

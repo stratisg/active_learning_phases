@@ -1,8 +1,6 @@
 """
 Training/Fit model given a dataset
 """
-import os
-import glob
 import numpy as np
 import torch
 from config import n_points, fit_model, training_args
@@ -11,12 +9,13 @@ from config import data_dir_model, results_dir_model
 from simulation import Simulation
 from training import training
 from optimize import optimize
-from analyze_samples import get_quantity
-from utilities import calculate_absolute_magnetization, load_quantity
+from analyze_samples import save_quantity
+from utilities import calculate_absolute_magnetization, load_data
+
 
 # 1. Load initial training set.
 quant_name = "avg_magnetization"
-l_values = load_quantity(results_dir_model, quant_name)
+l_values = load_data(results_dir_model, quant_name)
 l_quantity_mean = np.zeros(len(l_values), dtype=float)
 l_temperatures = np.zeros_like(l_quantity_mean)
 l_interactions = np.zeros_like(l_quantity_mean)
@@ -30,37 +29,46 @@ l_data_out = torch.tensor(l_quantity_mean, dtype=torch.float)
 l_data_out = torch.reshape(l_data_out, (len(l_data_in), 1))
 
 for i_pt in range(n_points):
+    print(79 * "=")
+    print(f"Test point {i_pt:03d}")
+    
     # 2. Train/fit the model.
-    model = training(l_data_in, l_data_out, fit_model,**training_args)
+    fit_model = training(l_data_in, l_data_out, fit_model,**training_args)
 
     # 3. Suggest a new set of parameters to simulate.
     # We find the point that maximizes the magnitude of the gradient of
     # the model with respect to its input.
     # TODO: Under construction.
-    temperature, interaction = optimize(model, n_input=l_data_in.shape[1])
-    print("temperature")
-    print(temperature)
-    print("interaction")
-    print(interaction)
-    quit()
+    temperature, interaction = optimize(fit_model, n_input=l_data_in.shape[1])
+    print(39 * "-")
+    print("Optimized parameters")
+    print(f"temperature {temperature}")
+    print(f"interaction {interaction}")
+    print(39 * "-")
+    
     # 4. Run the simulation.
+    simulation_args["temperature"] = temperature
     model.interaction = interaction
     simulation = Simulation(model, **simulation_args)
     simulation.generate_samples()
 
-    # 5. Analyze the data of the simulation.
-    filename = f"{data_dir_model}_temperature_{temperature}_" \
-        f"interaction_{interaction}"
+    # 5. Save the data and calculate the order parameter of the simulation.
+    filename = f"{data_dir_model}/data_{model.model_name}_" \
+               f"temperature_{temperature}_interaction_{interaction}"
     quant_fn = calculate_absolute_magnetization
     quant_args = {}
-    get_quantity(filename, quant_name, quant_fn, quant_args,
-                 results_dir_model)
-# 6. Append the results of the simulation on the training set.
-# 7. Repeat from step 2 until a certain criterion is satisfied. 
+    quantity_mean, quantity_std = save_quantity(filename, quant_name, quant_fn,
+                                               quant_args, results_dir_model)
+    
+    # 6. Append the results of the simulation on the training set.
+    data_in_new = torch.tensor([temperature, interaction])
+    l_data_in = torch.cat([l_data_in, data_in_new])
+    data_out_new = torch.tensor([quantity_mean])
+    l_data_out = torch.cat([l_data_out, data_out_new])
 
+    # 7. Repeat from step 2 until a certain criterion is satisfied.
 
-# TODO: Use results from all simulations to fit a model that 
-# outputs the order parameter as a function of the model parameters.
-# TODO: Find the set of points that satisfy a certain objective 
-# such as we have the highest uncertainty or most sensitivity to 
+# TODO: Find the set of points that satisfy a certain objective
+# such as we have the highest uncertainty or most sensitivity to
 # input parameters.
+# TODO: Generalize to a generic model parameters and order parameter.

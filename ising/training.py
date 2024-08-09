@@ -17,9 +17,10 @@ def training(data_in, data_out, model, loss_fn, optimizer, n_epochs=int(1e1),
             loss.backward()
             optimizer.step()
         if verbose:
-            print(79 * "=")
+            print(39 * "+")
             prediction = model(data_in) 
             loss = loss_fn(prediction, data_out)
-            print(f"Epoch {i_epoch:03d}\tLoss:{loss.item():.3e}")
-
+            print(f"Training Epoch {i_epoch:03d}\tLoss:{loss.item():.3e}")
+    print(39 * "+")
+    
     return model 
