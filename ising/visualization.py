@@ -18,7 +18,7 @@ def save_fig(figname, dpi=600, pics_dir="../pics/"):
 
 
 def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
-                  vmin=0, vmax=1):
+                  vmin=0, vmax=1, marker="."):
     """
     Plot quantity as a function of temperature.
     """
@@ -31,7 +31,7 @@ def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
         l_temperature[i_val] = d_vals["temperature"]
         l_quantity_mean[i_val] = d_vals["quantity_mean"]
     plt.scatter(l_interaction, l_temperature, c=l_quantity_mean, vmin=vmin,
-                vmax=vmax)
+                vmax=vmax, marker=marker)
     
     plt.xlabel(d_plot["xlabel"])
     plt.ylabel(d_plot["ylabel"])

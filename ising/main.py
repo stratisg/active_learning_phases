@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from config import n_points, fit_model, training_args
 from config import model, simulation_args
+from config import choose_args
 from config import data_dir_model, results_dir_model
 from simulation import Simulation
 from training import training
@@ -44,7 +45,8 @@ for i_pt in range(n_points):
     # input parameters.
     # TODO: Put bounds for temperature so it stays positive.
     # TODO: Put bounds for parameters.
-    temperature, interaction = optimize(fit_model, n_input=l_data_in.shape[1])
+    temperature, interaction = optimize(fit_model, n_input=l_data_in.shape[1],
+                                        **choose_args)
     print(39 * "-")
     print("Optimized parameters")
     print(f"temperature {temperature}")
@@ -73,4 +75,7 @@ for i_pt in range(n_points):
 
     # 7. Repeat from step 2 until a certain criterion is satisfied.
 
+# TODO: Save model.
+# TODO: Use model to generate plot.
+# TODO: Use external magnetic field.
 # TODO: Generalize to a generic model parameters and order parameter.

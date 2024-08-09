@@ -74,13 +74,17 @@ n_epochs = int(1e1)
 n_points = int(1e1)
 loss_fn = MSELoss()
 verbose = True
-training_args = dict(loss_fn=loss_fn, optimizer=optimizer, n_epochs=n_epochs,
-                     verbose=verbose)
+training_args = {"loss_fn": loss_fn, "optimizer": optimizer,
+                 "n_epochs": n_epochs, "verbose": verbose}
 
 # Optimization parameters.
 step = 1e-2
 grad_threshold = 1e4
 n_iter = int(1e3)
+choose_args = {
+    "step": 1e-2, "grad_threshold": 1e4, "n_iter": int(1e3),
+    "bounds":[[1, -3], [10, 3]]
+    }
 
 # Parameters used to generate results.
 results_dir = "../results"
