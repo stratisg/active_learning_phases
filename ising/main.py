@@ -33,19 +33,24 @@ for i_pt in range(n_points):
     print(f"Test point {i_pt:03d}")
     
     # 2. Train/fit the model.
-    fit_model = training(l_data_in, l_data_out, fit_model,**training_args)
+    fit_model = training(l_data_in, l_data_out, fit_model, **training_args)
 
     # 3. Suggest a new set of parameters to simulate.
     # We find the point that maximizes the magnitude of the gradient of
     # the model with respect to its input.
-    # TODO: Under construction.
+    
+    # TODO: Find the set of points that satisfy a certain objective
+    # such as we have the highest uncertainty or most sensitivity to
+    # input parameters.
+    # TODO: Put bounds for temperature so it stays positive.
+    # TODO: Put bounds for parameters.
     temperature, interaction = optimize(fit_model, n_input=l_data_in.shape[1])
     print(39 * "-")
     print("Optimized parameters")
     print(f"temperature {temperature}")
     print(f"interaction {interaction}")
     print(39 * "-")
-    
+
     # 4. Run the simulation.
     simulation_args["temperature"] = temperature
     model.interaction = interaction
@@ -54,21 +59,18 @@ for i_pt in range(n_points):
 
     # 5. Save the data and calculate the order parameter of the simulation.
     filename = f"{data_dir_model}/data_{model.model_name}_" \
-               f"temperature_{temperature}_interaction_{interaction}"
+               f"temperature_{temperature}_interaction_{interaction}.npz"
     quant_fn = calculate_absolute_magnetization
     quant_args = {}
     quantity_mean, quantity_std = save_quantity(filename, quant_name, quant_fn,
                                                quant_args, results_dir_model)
     
     # 6. Append the results of the simulation on the training set.
-    data_in_new = torch.tensor([temperature, interaction])
+    data_in_new = torch.tensor([[temperature, interaction]], dtype=torch.float)
     l_data_in = torch.cat([l_data_in, data_in_new])
-    data_out_new = torch.tensor([quantity_mean])
+    data_out_new = torch.tensor([[quantity_mean]], dtype=torch.float)
     l_data_out = torch.cat([l_data_out, data_out_new])
 
     # 7. Repeat from step 2 until a certain criterion is satisfied.
 
-# TODO: Find the set of points that satisfy a certain objective
-# such as we have the highest uncertainty or most sensitivity to
-# input parameters.
 # TODO: Generalize to a generic model parameters and order parameter.

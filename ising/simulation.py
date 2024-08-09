@@ -44,7 +44,7 @@ class Simulation:
         
         np.savez(f"{self.data_dir}/data_{self.model.model_name}_"\
                  f"temperature_{self.temperature}_"\
-                 f"interaction_{self.model.interaction}",
+                 f"interaction_{self.model.interaction}.npz",
                  samples=self.samples,
                  temperature=self.temperature,
                  interaction=self.model.interaction,
