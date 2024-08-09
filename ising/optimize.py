@@ -25,11 +25,7 @@ def optimize(model, n_input, step=1e-2, grad_threshold=1e4, n_iter=int(1e3),
         for i_val, value in enumerate(vec_in):
             if value < bounds[0][i_val]:
                 vec_in = torch.rand(n_input)
-                i_iter = 0
-                continue
             elif value > bounds[1][i_val]:
                 vec_in = torch.rand(n_input)
-                i_iter = 0
-                continue
 
     return vec_in
