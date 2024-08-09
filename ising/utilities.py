@@ -44,8 +44,7 @@ def calculate_quantity_stats(l_samples, quantity_fn, quant_args):
     return quantity.mean(), quantity.std()
 
 
-
-def load_quantity(results_dir_model, quant_name):
+def load_data(results_dir_model, quant_name):
     """
     Load quantities from results directory.
     """

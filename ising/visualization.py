@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from config import results_dir_model
 from config import figname, dpi, pics_dir_model
-from utilities import load_quantity
+from utilities import load_data
+
 
 def save_fig(figname, dpi=600, pics_dir="../pics/"):
     """
@@ -22,9 +23,16 @@ def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
     Plot quantity as a function of temperature.
     """
     l_values = d_plot["l_values"]
-    for d_vals in l_values:
-        plt.scatter(d_vals["interaction"], d_vals["temperature"],
-                    c=d_vals["quantity_mean"], vmin=vmin, vmax=vmax)
+    l_interaction = np.zeros(len(l_values), dtype=float)
+    l_temperature = np.zeros_like(l_interaction)
+    l_quantity_mean = np.zeros_like(l_interaction)
+    for i_val, d_vals in enumerate(l_values):
+        l_interaction[i_val] = d_vals["interaction"]
+        l_temperature[i_val] = d_vals["temperature"]
+        l_quantity_mean[i_val] = d_vals["quantity_mean"]
+    plt.scatter(l_interaction, l_temperature, c=l_quantity_mean, vmin=vmin,
+                vmax=vmax)
+    
     plt.xlabel(d_plot["xlabel"])
     plt.ylabel(d_plot["ylabel"])
     plt.colorbar()
@@ -32,6 +40,6 @@ def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
 
 
 quant_name = "avg_magnetization"
-l_values = load_quantity(results_dir_model, quant_name)
+l_values = load_data(results_dir_model, quant_name)
 d_plot = dict(l_values=l_values, xlabel="J", ylabel="T")
 plot_quantity(quant_name, d_plot, figname, dpi, pics_dir_model)
