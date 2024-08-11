@@ -2,6 +2,14 @@ import torch
 from torch.optim import SGD
 
 
+def generate_random_vector(n_input, bounds):
+    """
+    Generate random vector using uniform distribution given specific 
+    bounds.
+    """
+    return torch.rand(n_input) * (bounds[1] - bounds[0]) + bounds[0]
+
+
 def optimize(model, n_input, step=1e-2, grad_threshold=1e4, n_iter=int(1e3),
              bounds=[[1, -3], [10, 3]]):
     """
@@ -11,7 +19,7 @@ def optimize(model, n_input, step=1e-2, grad_threshold=1e4, n_iter=int(1e3),
     # TODO: Find region where Hessian is zero.
     # Randomly initialize an input vector.
     bounds = torch.tensor(bounds, dtype=torch.float)
-    vec_in = torch.rand(n_input) * (bounds[1] - bounds[0]) + bounds[0]
+    vec_in = generate_random_vector(n_input, bounds)
 
     for i_iter in range(n_iter):
         vec_in.requires_grad = True
@@ -25,11 +33,8 @@ def optimize(model, n_input, step=1e-2, grad_threshold=1e4, n_iter=int(1e3),
         for i_val, value in enumerate(vec_in):
             if value < bounds[0][i_val]:
                 print("Below low bound")
-                vec_in = (torch.rand(n_input) *\
-                          (bounds[1] - bounds[0]) + bounds[0])
+                vec_in = generate_random_vector(n_input, bounds)
             elif value > bounds[1][i_val]:
                 print("Above high bound")
-                vec_in = (torch.rand(n_input) *\
-                           (bounds[1] - bounds[0]) + bounds[0])
-
+                vec_in = generate_random_vector(n_input, bounds)
     return vec_in

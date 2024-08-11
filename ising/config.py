@@ -7,6 +7,7 @@ from torch.nn import Sequential, Linear, ReLU
 from torch.nn import MSELoss
 from torch.optim import SGD
 from ising_model import IsingModel
+from utilities import calculate_absolute_magnetization
 
 
 # General variables.
@@ -86,6 +87,11 @@ choose_args = {
     "bounds":[[1, -3], [10, 3]]
     }
 
+# Quantity of interest
+quant_name = "avg_magnetization"
+quant_fn = calculate_absolute_magnetization
+quant_args = {}
+
 # Parameters used to generate results.
 results_dir = "../results"
 if not os.path.isdir(results_dir):
@@ -93,6 +99,15 @@ if not os.path.isdir(results_dir):
 results_dir_model = f"{results_dir}/{model_name}"
 if not os.path.isdir(results_dir_model):
     os.mkdir(results_dir_model)
+
+
+# Model directory.
+model_dir = "../models"
+if not os.path.isdir(model_dir):
+    os.mkdir(model_dir)
+model_dir_model = f"{model_dir}/{model_name}"
+if not os.path.isdir(model_dir_model):
+    os.mkdir(model_dir_model)
 
 # Visualization parameters.
 dpi = 600

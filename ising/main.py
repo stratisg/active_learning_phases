@@ -7,15 +7,16 @@ from config import n_points, fit_model, training_args
 from config import model, simulation_args
 from config import choose_args
 from config import data_dir_model, results_dir_model
+from config import model_dir_model
+from config import quant_name, quant_fn, quant_args
 from simulation import Simulation
 from training import training
 from optimize import optimize
 from analyze_samples import save_quantity
-from utilities import calculate_absolute_magnetization, load_data
+from utilities import load_data
 
 
 # 1. Load initial training set.
-quant_name = "avg_magnetization"
 l_values = load_data(results_dir_model, quant_name)
 l_quantity_mean = np.zeros(len(l_values), dtype=float)
 l_temperatures = np.zeros_like(l_quantity_mean)
@@ -32,7 +33,7 @@ l_data_out = torch.reshape(l_data_out, (len(l_data_in), 1))
 for i_pt in range(n_points):
     print(79 * "=")
     print(f"Test point {i_pt:03d}")
-    
+
     # 2. Train/fit the model.
     fit_model = training(l_data_in, l_data_out, fit_model, **training_args)
 
@@ -62,10 +63,8 @@ for i_pt in range(n_points):
     # 5. Save the data and calculate the order parameter of the simulation.
     filename = f"{data_dir_model}/data_{model.model_name}_" \
                f"temperature_{temperature}_interaction_{interaction}.npz"
-    quant_fn = calculate_absolute_magnetization
-    quant_args = {}
     quantity_mean, quantity_std = save_quantity(filename, quant_name, quant_fn,
-                                               quant_args, results_dir_model)
+                                                quant_args, results_dir_model)
     
     # 6. Append the results of the simulation on the training set.
     data_in_new = torch.tensor([[temperature, interaction]], dtype=torch.float)
@@ -75,7 +74,9 @@ for i_pt in range(n_points):
 
     # 7. Repeat from step 2 until a certain criterion is satisfied.
 
-# TODO: Save model.
-# TODO: Use model to generate plot.
+# Save model.
+model_path = f"{model_dir_model}/{model.model_name}_{quant_name}.pth"
+torch.save(fit_model.state_dict(), model_path)
+
 # TODO: Use external magnetic field.
 # TODO: Generalize to a generic model parameters and order parameter.

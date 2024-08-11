@@ -39,7 +39,8 @@ def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
     save_fig(f"{figname}_{quant_name}", dpi, pics_dir)
 
 
-quant_name = "avg_magnetization"
-l_values = load_data(results_dir_model, quant_name)
-d_plot = dict(l_values=l_values, xlabel="J", ylabel="T")
-plot_quantity(quant_name, d_plot, figname, dpi, pics_dir_model)
+if __name__ == "__main__":
+    quant_name = "avg_magnetization"
+    l_values = load_data(results_dir_model, quant_name)
+    d_plot = dict(l_values=l_values, xlabel="J", ylabel="T")
+    plot_quantity(quant_name, d_plot, figname, dpi, pics_dir_model)
