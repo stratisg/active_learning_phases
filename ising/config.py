@@ -3,7 +3,8 @@ Configuration for the Ising model and its simulation.
 """
 import os
 import numpy as np
-from torch.nn import Sequential, Linear, ReLU
+import torch
+from torch.nn import Sequential, Linear, ReLU, Sigmoid
 from torch.nn import MSELoss
 from torch.optim import SGD
 from ising_model import IsingModel
@@ -16,7 +17,7 @@ if not os.path.isdir(data_dir):
     os.mkdir(data_dir)
 
 # Model parameters.
-ising_args = dict(lattice=np.array([10, 10], dtype=int), radius=1, 
+ising_args = dict(lattice=np.array([10, 10], dtype=int), radius=1,
                   external_field=0, boundary_conds="periodic", seed=1959)
 
 model = IsingModel(**ising_args)
@@ -30,10 +31,6 @@ if not os.path.isdir(data_dir_model):
 
 # Simulation configuration.
 n_samples = int(1e5)
-k_boltzmann = 1
-warmup_iter = int(1e3)
-# Simulation configuration.
-n_samples = int(1e3)
 k_boltzmann = 1
 warmup_iter = int(1e3)
 temperature = 2.0
@@ -71,7 +68,8 @@ optimizer_fn = SGD
 optimizer_args = dict(lr=1e-3, momentum=0, dampening=0, weight_decay=0,
                       nesterov=False)
 optimizer = optimizer_fn(fit_model.parameters(), **optimizer_args)
-n_epochs = int(1e1)
+n_epochs = int(1e2)
+print_epochs = 10
 n_points = int(1e1)
 loss_fn = MSELoss()
 verbose = True
@@ -100,7 +98,6 @@ results_dir_model = f"{results_dir}/{model_name}"
 if not os.path.isdir(results_dir_model):
     os.mkdir(results_dir_model)
 
-
 # Model directory.
 model_dir = "../models"
 if not os.path.isdir(model_dir):
@@ -108,6 +105,21 @@ if not os.path.isdir(model_dir):
 model_dir_model = f"{model_dir}/{model_name}"
 if not os.path.isdir(model_dir_model):
     os.mkdir(model_dir_model)
+
+# Estimate configuration.
+n_pars = 2
+min_temp = 0
+max_temp = 10
+delta_temp = 1e-2
+
+min_int = -3
+max_int = 3
+delta_int = 1e-2
+
+d_pars = {
+    "l_temperatures": torch.arange(min_temp, max_temp, delta_temp),
+    "l_interactions": torch.arange(min_int, max_int, delta_int)
+          }
 
 # Visualization parameters.
 dpi = 600

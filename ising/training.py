@@ -5,7 +5,7 @@ import torch
 
 
 def training(data_in, data_out, model, loss_fn, optimizer, n_epochs=int(1e1),
-             verbose=False):
+             verbose=False, print_epoch=10):
     """
     Training function.
     """
@@ -17,10 +17,11 @@ def training(data_in, data_out, model, loss_fn, optimizer, n_epochs=int(1e1),
             loss.backward()
             optimizer.step()
         if verbose:
-            print(39 * "+")
-            prediction = model(data_in) 
-            loss = loss_fn(prediction, data_out)
-            print(f"Training Epoch {i_epoch:03d}\tLoss:{loss.item():.3e}")
+            if not n_epochs % i_epoch:
+                print(39 * "+")
+                prediction = model(data_in) 
+                loss = loss_fn(prediction, data_out)
+                print(f"Training Epoch {i_epoch:03d}\tLoss:{loss.item():.3e}")
     print(39 * "+")
     
     return model 
