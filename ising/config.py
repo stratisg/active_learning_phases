@@ -71,8 +71,8 @@ optimizer_fn = SGD
 optimizer_args = dict(lr=1e-3, momentum=0, dampening=0, weight_decay=0,
                       nesterov=False)
 optimizer = optimizer_fn(fit_model.parameters(), **optimizer_args)
-n_epochs = int(1e1)
-n_points = int(1e1)
+n_epochs = int(1e2)
+n_points = int(1e2)
 loss_fn = MSELoss()
 verbose = True
 training_args = {"loss_fn": loss_fn, "optimizer": optimizer,
