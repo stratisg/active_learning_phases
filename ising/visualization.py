@@ -35,7 +35,11 @@ def plot_quantity(quant_name, d_plot, figname, dpi=600, pics_dir="../pics",
     
     plt.xlabel(d_plot["xlabel"])
     plt.ylabel(d_plot["ylabel"])
-    plt.colorbar()
+    cbar = plt.colorbar()
+    if quant_name == "avg_magnetization":
+        cbar.set_label(r"$ |M| $")
+    elif quant_name == "avg_stagg_magnetization":
+        cbar.set_label(r"$ |M_s| $")
     save_fig(f"{figname}_{quant_name}", dpi, pics_dir)
 
 
